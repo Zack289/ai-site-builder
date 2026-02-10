@@ -11,3 +11,7 @@
     @apply cursor-pointer;
   }
 }
+
+.no-scrollbar::-weblit-scrollbar{
+    display: none;
+}
