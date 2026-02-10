@@ -12,6 +12,6 @@
   }
 }
 
-.no-scrollbar::-weblit-scrollbar{
+.no-scrollbar::-webkit-scrollbar{
     display: none;
 }
