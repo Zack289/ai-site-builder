@@ -14,9 +14,15 @@ import {
   XIcon,
 } from "lucide-react";
 import type { Project } from "../types";
-import { dummyConversations, dummyProjects, dummyVersion } from "../assets/assets";
+import {
+  dummyConversations,
+  dummyProjects,
+  dummyVersion,
+} from "../assets/assets";
 import Sidebar from "../components/Sidebar";
-import ProjectPreview, { type ProjectPreviewRef } from "../components/ProjectPreview";
+import ProjectPreview, {
+  type ProjectPreviewRef,
+} from "../components/ProjectPreview";
 
 function Projects() {
   const [project, setProject] = useState<Project | null>(null);
@@ -30,7 +36,7 @@ function Projects() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const previewRef = useRef<ProjectPreviewRef>(null)
+  const previewRef = useRef<ProjectPreviewRef>(null);
 
   const { projectId } = useParams();
   const navigate = useNavigate();
@@ -40,7 +46,11 @@ function Projects() {
 
     setTimeout(() => {
       if (project) {
-        setProject({ ...project, conversation: dummyConversations, versions: dummyVersion });
+        setProject({
+          ...project,
+          conversation: dummyConversations,
+          versions: dummyVersion,
+        });
         setLoading(false);
         setIsGenerating(project.current_code ? false : true);
       }
@@ -49,7 +59,23 @@ function Projects() {
 
   const saveProject = async () => {};
 
-  const downloadCode = () => {};
+  //download code (index.html)
+  const downloadCode = () => {
+    const code = previewRef.current?.getCode() || project?.current_code;
+    if (!code) {
+      if (isGenerating) {
+        return;
+      }
+      return;
+    }
+
+    const element = document.createElement("a");
+    const file = new Blob([code], { type: "text/html" });
+    element.href = URL.createObjectURL(file);
+    element.download = "index.html";
+    document.body.appendChild(element);
+    element.click();
+  };
 
   const togglePublish = async () => {};
 
@@ -176,7 +202,12 @@ function Projects() {
         />
 
         <div className="flex-1 p-2 pl-0">
-          <ProjectPreview ref={previewRef} project={project} isGenerating={isGenerating} device={device}/>
+          <ProjectPreview
+            ref={previewRef}
+            project={project}
+            isGenerating={isGenerating}
+            device={device}
+          />
         </div>
       </div>
     </div>

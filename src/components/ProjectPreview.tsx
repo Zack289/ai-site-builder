@@ -1,4 +1,10 @@
-import React, { forwardRef, useEffect, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import type { Project } from "../types";
 import { iframeScript } from "../assets/assets";
 import EditorPanel from "./EditorPanel";
@@ -28,6 +34,34 @@ const ProjectPreview = forwardRef<ProjectPreviewRef, ProjectPreviewProps>(
       desktop: "w-full",
     };
 
+    //useImperativeHandle lets a child component expose specific functions or values to its parent instead of exposing the entire component or DOM node.
+    useImperativeHandle(ref, () => ({
+      getCode: () => {
+        const doc = iframeRef.current?.contentDocument;
+        if (!doc) return undefined;
+
+        // 1. Remove our selection class / attributes / outline from all elements
+        doc
+          .querySelectorAll("ai-selected-element,[data-ai-selected]")
+          .forEach((el) => {
+            el.classList.remove("ai-selected-element");
+            el.removeAttribute("data-ai-selected");
+            (el as HTMLElement).style.outline = "";
+          });
+
+        // 2. Remove injected styles + script from the document
+        const previewStyle = doc.getElementById("ai-preview-style");
+        if (previewStyle) previewStyle.remove();
+
+        const previewScript = doc.getElementById("ai-preview-scrit");
+        if (previewScript) previewScript.remove();
+
+        // 3. Serialize clean HTML
+        const html = doc.documentElement.outerHTML;
+        return html;
+      },
+    }));
+
     useEffect(() => {
       const handleMessage = (event: MessageEvent) => {
         if (event.data.type === "ELEMENT_SELECTED") {
@@ -40,14 +74,17 @@ const ProjectPreview = forwardRef<ProjectPreviewRef, ProjectPreviewProps>(
       return () => window.removeEventListener("message", handleMessage);
     }, []);
 
-    const handleUpdate = (updates: any)=>{
-        if(iframeRef.current?.contentWindow){
-            iframeRef.current.contentWindow.postMessage({
-                type: 'UPDATE_ELEMENT',
-                payload: updates
-            }, '*')
-        }
-    }
+    const handleUpdate = (updates: any) => {
+      if (iframeRef.current?.contentWindow) {
+        iframeRef.current.contentWindow.postMessage(
+          {
+            type: "UPDATE_ELEMENT",
+            payload: updates,
+          },
+          "*",
+        );
+      }
+    };
 
     const injectPreview = (html: string) => {
       if (!html) return "";
