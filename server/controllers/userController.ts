@@ -22,7 +22,7 @@ export const getUserCredits = async (req: Request, res: Response) => {
 };
 
 // controller functiuon to create a new Project
-export const createUserProjects = async (req: Request, res: Response) => {
+export const createUserProject = async (req: Request, res: Response) => {
   const userId = req.userId;
   try {
     const { initial_prompt } = req.body;
