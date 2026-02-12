@@ -268,28 +268,28 @@ export const togglePublish = async (req: Request, res: Response) => {
     }
 
     const project = await prisma.websiteProject.findUnique({
-        where: {id: projectId, userId}
+      where: { id: projectId, userId },
     });
 
-    if(!project){
-        res.status(404).json({message: "Project not found!"})
-    };
+    if (!project) {
+      return res.status(404).json({ message: "Project not found!" });
+    }
 
     await prisma.websiteProject.update({
-        where: {id: projectId},
-        data: {isPublished: !project?.isPublished}
+      where: { id: projectId },
+      data: { isPublished: !project?.isPublished },
     });
 
-    res.json({ message: project?.isPublished ? 'Project Unpublished' : 'Project Published Successfully' });
-
+    res.json({
+      message: project?.isPublished
+        ? "Project Unpublished"
+        : "Project Published Successfully",
+    });
   } catch (error: any) {
     console.log(error.code || error.message);
     res.status(500).json({ message: error.message });
   }
 };
 
-
 // Controller function to purchase credits
-export const purchaseCredit = async (req: Request, res: Response) => {
-  
-};
+export const purchaseCredit = async (req: Request, res: Response) => {};
