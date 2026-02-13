@@ -27,7 +27,7 @@ function Projects() {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const {data: session, isPending} = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession();
 
   const [isGenerating, setIsGenerating] = useState(true);
   const [device, setDevice] = useState<"phone" | "tablet" | "desktop">(
@@ -44,7 +44,7 @@ function Projects() {
 
   const fetchProject = async () => {
     try {
-      const {data} = await api.get(`/api/user/project/${projectId}`);
+      const { data } = await api.get(`/api/user/project/${projectId}`);
       setProject(data.project);
 
       setIsGenerating(data.project.current_code ? false : true);
@@ -52,11 +52,31 @@ function Projects() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error?.response?.data?.message || error.message);
-      console.log(error)
+      console.log(error);
     }
   };
 
-  const saveProject = async () => {};
+  const saveProject = async () => {
+    if (!previewRef.current) return;
+    const code = previewRef.current.getCode();
+    if (!code) return;
+
+    setIsSaving(true);
+
+    try {
+      const { data } = await api.put(`/api/project/save/${projectId}`, {
+        code,
+      });
+      toast.success(data.message);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error.message);
+      console.log(error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   //download code (index.html)
   const downloadCode = () => {
@@ -76,24 +96,40 @@ function Projects() {
     element.click();
   };
 
-  const togglePublish = async () => {};
+  const togglePublish = async () => {
+    try {
+      const { data } = await api.get(`/api/user/publish-toggle/${projectId}`);
+      toast.success(data.message);
 
-  useEffect(()=>{
-    if(session?.user){
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      fetchProject();
-    }else if(!isPending && !session?.user){
-      navigate('/');
-      toast('Please login to view your projects.')
+      setProject((prev) =>
+        prev ? { ...prev, isPublished: !prev.isPublished } : null,
+      );
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error.message);
+      console.log(error);
+    } finally {
+      setIsSaving(false);
     }
-  },[session?.user])
+  };
 
   useEffect(() => {
-    if(project && !project.current_code){
-      const intervalId = setInterval(fetchProject, 10000);
-      return ()=> clearInterval(intervalId)
+    if (session?.user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchProject();
+    } else if (!isPending && !session?.user) {
+      navigate("/");
+      toast("Please login to view your projects.");
     }
-     // eslint-disable-next-line react-hooks/set-state-in-effect
+  }, [session?.user]);
+
+  useEffect(() => {
+    if (project && !project.current_code) {
+      const intervalId = setInterval(fetchProject, 10000);
+      return () => clearInterval(intervalId);
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchProject();
   }, [project]);
 
