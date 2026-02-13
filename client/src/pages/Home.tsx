@@ -1,5 +1,9 @@
+import api from "@/configs/axios";
+import { authClient } from "@/lib/auth-client";
 import { Loader2Icon } from "lucide-react";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 function Home() {
   const companiesLogo = [
@@ -109,19 +113,38 @@ function Home() {
   const [loading, setLoading] = useState(false);
   const [input, setInput] = useState("");
 
+  //fetching the user
+  const { data: session } = authClient.useSession();
+  const navigate = useNavigate();
+
   const onSubmitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    setLoading(true);
-    //simulate api call
-    setTimeout(() => {
+    try {
+      if (!session?.user) {
+        return toast.error("Please signin to create project.");
+      } else if (!input.trim()) {
+        return toast.error("Please enter a message");
+      }
+      setLoading(true);
+
+      const { data } = await api.post("/api/user/project", {
+        initial_prompt: input,
+      });
       setLoading(false);
-    }, 3000);
+
+      navigate(`/projects/${data.projectId}`);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      setLoading(false);
+      toast.error(error?.response?.data?.message || error.message);
+      console.log(error);
+    }
   };
   return (
     <section className="flex flex-col items-center text-white text-sm pb-20 px-4 font-poppins">
       <a
-        href="https://prebuiltui.com"
+        href="/"
         className="flex items-center gap-2 border border-slate-700 rounded-full p-1 pr-3 text-sm mt-20"
       >
         <span className="bg-indigo-600 text-xs px-3 py-1 rounded-full">
@@ -179,7 +202,7 @@ function Home() {
         </button>
       </form>
 
-      <div className="flex flex-wrap items-center justify-center gap-16 md:gap-20 mx-auto mt-16">
+      {/* <div className="flex flex-wrap items-center justify-center gap-16 md:gap-20 mx-auto mt-16">
         <img
           className="max-w-28 md:max-w-32"
           src="https://saasly.prebuiltui.com/assets/companies-logo/framer.svg"
@@ -205,7 +228,7 @@ function Home() {
           src="https://saasly.prebuiltui.com/assets/companies-logo/walmart.svg"
           alt=""
         />
-      </div>
+      </div> */}
 
       <div
         className="flex flex-wrap justify-between max-sm:justify-center gap-6 max-w-3xl w-full mx-auto py-4"

@@ -160,6 +160,24 @@ export const createUserProject = async (req: Request, res: Response) => {
 
     const code = codeGenerationResponse.choices[0].message.content || "";
 
+     if (!code) {
+      await prisma.conversation.create({
+        data: {
+          role: "assistant",
+          content: "Unable to generate code. Please try again!",
+          projectId: project.id,
+        },
+      });
+
+      // if any error occur while creating site, increase credit
+      await prisma.user.update({
+        where: { id: userId },
+        data: { credits: { increment: 5 } },
+      });
+
+      return;
+    }
+
     // create version for the project
     const version = await prisma.version.create({
       data: {
