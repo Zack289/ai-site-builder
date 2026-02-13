@@ -75,7 +75,7 @@ export const createUserProject = async (req: Request, res: Response) => {
 
     // Enhance user Prompt
     const promptEnhanceResponse = await openai.chat.completions.create({
-      model: "z-ai/glm-4.5-air:free",
+      model: "deepseek/deepseek-r1-0528:free",
       messages: [
         {
           role: "system",
@@ -119,7 +119,7 @@ export const createUserProject = async (req: Request, res: Response) => {
 
     //generate website code
     const codeGenerationResponse = await openai.chat.completions.create({
-      model: "z-ai/glm-4.5-air:free",
+      model: "deepseek/deepseek-r1-0528:free",
       messages: [
         {
           role: "system",
