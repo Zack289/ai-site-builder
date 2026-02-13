@@ -14,19 +14,20 @@ import {
   XIcon,
 } from "lucide-react";
 import type { Project } from "../types";
-import {
-  dummyConversations,
-  dummyProjects,
-  dummyVersion,
-} from "../assets/assets";
+
 import Sidebar from "../components/Sidebar";
 import ProjectPreview, {
   type ProjectPreviewRef,
 } from "../components/ProjectPreview";
+import api from "@/configs/axios";
+import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 
 function Projects() {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const { data: session, isPending } = authClient.useSession();
 
   const [isGenerating, setIsGenerating] = useState(true);
   const [device, setDevice] = useState<"phone" | "tablet" | "desktop">(
@@ -42,22 +43,40 @@ function Projects() {
   const navigate = useNavigate();
 
   const fetchProject = async () => {
-    const project = dummyProjects.find((project) => project.id === projectId);
+    try {
+      const { data } = await api.get(`/api/user/project/${projectId}`);
+      setProject(data.project);
 
-    setTimeout(() => {
-      if (project) {
-        setProject({
-          ...project,
-          conversation: dummyConversations,
-          versions: dummyVersion,
-        });
-        setLoading(false);
-        setIsGenerating(project.current_code ? false : true);
-      }
-    }, 2000);
+      setIsGenerating(data.project.current_code ? false : true);
+      setLoading(false);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error.message);
+      console.log(error);
+    }
   };
 
-  const saveProject = async () => {};
+  const saveProject = async () => {
+    if (!previewRef.current) return;
+    const code = previewRef.current.getCode();
+    if (!code) return;
+
+    setIsSaving(true);
+
+    try {
+      const { data } = await api.put(`/api/project/save/${projectId}`, {
+        code,
+      });
+      toast.success(data.message);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error.message);
+      console.log(error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   //download code (index.html)
   const downloadCode = () => {
@@ -77,11 +96,42 @@ function Projects() {
     element.click();
   };
 
-  const togglePublish = async () => {};
+  const togglePublish = async () => {
+    try {
+      const { data } = await api.get(`/api/user/publish-toggle/${projectId}`);
+      toast.success(data.message);
+
+      setProject((prev) =>
+        prev ? { ...prev, isPublished: !prev.isPublished } : null,
+      );
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error.message);
+      console.log(error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   useEffect(() => {
+    if (session?.user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchProject();
+    } else if (!isPending && !session?.user) {
+      navigate("/");
+      toast("Please login to view your projects.");
+    }
+  }, [session?.user]);
+
+  useEffect(() => {
+    if (project && !project.current_code) {
+      const intervalId = setInterval(fetchProject, 10000);
+      return () => clearInterval(intervalId);
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchProject();
-  }, []);
+  }, [project]);
 
   if (loading) {
     return (
