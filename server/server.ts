@@ -13,11 +13,17 @@ const port = 3000;
 const corsOptions = {
   origin: process.env.TRUSTED_ORIGINS?.split(",") || [],
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 app.use(cors(corsOptions));
 //for the stripe
-app.post('/api/stripe', express.raw({type: 'application/json'}), stripeWebhook)
+app.post(
+  "/api/stripe",
+  express.raw({ type: "application/json" }),
+  stripeWebhook,
+);
 
 app.all("/api/auth/{*any}", toNodeHandler(auth));
 
