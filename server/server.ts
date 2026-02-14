@@ -14,8 +14,8 @@ const port = process.env.PORT || 3000;
 const corsOptions = {
   origin: process.env.TRUSTED_ORIGINS?.split(",") || [],
   credentials: true,
-  // methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  // allowedHeaders: ["Content-Type", "Authorization"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 // const allowedOrigins = process.env.TRUSTED_ORIGINS?.split(",") || [];
@@ -34,6 +34,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+app.use(express.json({ limit: "50mb" }));
+
 
 //for the stripe
 app.post(
@@ -42,11 +44,11 @@ app.post(
   stripeWebhook,
 );
 
-app.all("/api/auth/{*any}", toNodeHandler(auth));
-// app.use("/api/auth", toNodeHandler(auth));
+// app.all("/api/auth/{*any}", toNodeHandler(auth));
+app.use("/api/auth", toNodeHandler(auth));
 
 
-app.use(express.json({ limit: "50mb" }));
+
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Server is Live!");
