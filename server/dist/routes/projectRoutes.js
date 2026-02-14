@@ -1,0 +1,12 @@
+import express from "express";
+import { protect } from "../middlewares/auth.js";
+import { deleteProject, getProjectById, getProjectPreview, getPublishedProojects, makeRevision, rollbackToVersion, saveProjectCode, } from "../controllers/projectController.js";
+const projetRouter = express.Router();
+projetRouter.post("/revision/:projectId", protect, makeRevision);
+projetRouter.put("/save/:projectId", protect, saveProjectCode);
+projetRouter.get("/rollback/:projectId/:versionId", protect, rollbackToVersion);
+projetRouter.delete("/:projectId", protect, deleteProject);
+projetRouter.get("/preview/:projectId", protect, getProjectPreview);
+projetRouter.get("/published", getPublishedProojects);
+projetRouter.get("/published/:projectId", getProjectById);
+export default projetRouter;
