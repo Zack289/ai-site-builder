@@ -10,14 +10,17 @@ import { stripeWebhook } from "./controllers/stripeWebhooks.js";
 
 const app = express();
 const port = 3000;
-const corsOptions = {
-  origin: process.env.TRUSTED_ORIGINS?.split(",") || [],
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-};
+// const corsOptions = {
+//   origin: process.env.TRUSTED_ORIGINS?.split(",") || [],
+//   credentials: true,
+//   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//   allowedHeaders: ["Content-Type", "Authorization"],
+// };
 
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
+
+app.use(cors({ origin: process.env.TRUSTED_ORIGINS, credentials: true }));
+
 //for the stripe
 app.post(
   "/api/stripe",
