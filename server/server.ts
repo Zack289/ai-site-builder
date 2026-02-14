@@ -10,28 +10,29 @@ import { stripeWebhook } from "./controllers/stripeWebhooks.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
-// const corsOptions = {
-//   origin: process.env.TRUSTED_ORIGINS?.split(",") || [],
-//   credentials: true,
-//   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-//   allowedHeaders: ["Content-Type", "Authorization"],
-// };
 
-const allowedOrigins = process.env.TRUSTED_ORIGINS?.split(",") || [];
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: process.env.TRUSTED_ORIGINS?.split(",") || [],
+  credentials: true,
+  // methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  // allowedHeaders: ["Content-Type", "Authorization"],
+};
 
-// app.use(cors(corsOptions));
+// const allowedOrigins = process.env.TRUSTED_ORIGINS?.split(",") || [];
+// app.use(
+//   cors({
+//     origin: (origin, callback) => {
+//       if (!origin || allowedOrigins.includes(origin)) {
+//         callback(null, true);
+//       } else {
+//         callback(new Error("Not allowed by CORS"));
+//       }
+//     },
+//     credentials: true,
+//   })
+// );
+
+app.use(cors(corsOptions));
 
 
 //for the stripe
@@ -41,8 +42,8 @@ app.post(
   stripeWebhook,
 );
 
-// app.all("/api/auth/{*any}", toNodeHandler(auth));
-app.use("/api/auth", toNodeHandler(auth));
+app.all("/api/auth/{*any}", toNodeHandler(auth));
+// app.use("/api/auth", toNodeHandler(auth));
 
 
 app.use(express.json({ limit: "50mb" }));
