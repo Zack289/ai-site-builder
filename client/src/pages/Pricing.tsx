@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { appPlans } from "../assets/assets";
 import Footer from "../components/Footer";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
+import api from "@/configs/axios";
 
 interface Plan {
   id: string;
@@ -11,12 +14,23 @@ interface Plan {
   features: string[];
 }
 function Pricing() {
-
   const [plans] = useState<Plan[]>(appPlans);
+  const { data: session } = authClient.useSession();
 
-   const handlePurchase = async (planId: string) => {
-        
+  const handlePurchase = async (planId: string) => {
+    try {
+      if (!session?.user) return toast("Please login to purchase credits");
+
+      const { data } = await api.post("/api/user/purchase-credits", { planId });
+      // eslint-disable-next-line
+      window.location.href = data.payment_link;
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error.message);
+      console.log(error);
     }
+  };
   return (
     <>
       <div className="w-full max-w-5xl mx-auto z-20 max-md:px-4 min-h-[80vh]">
@@ -81,7 +95,11 @@ function Pricing() {
           </div>
         </div>
 
-        <p className="mx-auto text-center text-sm max-w-md mt-10 text-white/60 font-light">Project <span className="text-white">Creation / Revision</span> consume <span className="text-white">5 credits</span>. You can purchase more credits to create more prejects.</p>
+        <p className="mx-auto text-center text-sm max-w-md mt-10 text-white/60 font-light">
+          Project <span className="text-white">Creation / Revision</span>{" "}
+          consume <span className="text-white">5 credits</span>. You can
+          purchase more credits to create more prejects.
+        </p>
       </div>
 
       <Footer />

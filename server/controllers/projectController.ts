@@ -57,7 +57,7 @@ export const makeRevision = async (req: Request, res: Response) => {
 
     // Enhance user prompt
     const promptEnhancePrompt = await openai.chat.completions.create({
-      model: "deepseek/deepseek-r1-0528:free",
+      model: "upstage/solar-pro-3:free",
       messages: [
         {
           role: "system",
@@ -101,7 +101,7 @@ export const makeRevision = async (req: Request, res: Response) => {
 
     //generate website code
     const codeGenerationResponse = await openai.chat.completions.create({
-      model: "deepseek/deepseek-r1-0528:free",
+      model: "upstage/solar-pro-3:free",
       messages: [
         {
           role: "system",
