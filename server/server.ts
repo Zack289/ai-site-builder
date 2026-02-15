@@ -19,23 +19,26 @@ const port = process.env.PORT || 3000;
 // };
 
 // app.use(cors(corsOptions));
+app.use(cors({ origin: process.env.TRUSTED_ORIGINS, credentials: true }));
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      const allowedOrigins =
-        process.env.TRUSTED_ORIGINS?.split(",") || [];
 
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.log("Blocked by CORS:", origin);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
+// app.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       const allowedOrigins =  process.env.TRUSTED_ORIGINS;
+//       // process.env.TRUSTED_ORIGINS?.split(",") || [];
+     
+      
+//       if (!origin || allowedOrigins.includes(origin)) {
+//         callback(null, true);
+//       } else {
+//         console.log("Blocked by CORS:", origin);
+//         callback(new Error("Not allowed by CORS"));
+//       }
+//     },
+//     credentials: true,
+//   })
+// );
 
 
 app.use(express.json({ limit: "50mb" }));
