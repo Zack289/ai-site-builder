@@ -41,7 +41,6 @@ app.use(cors({ origin: process.env.TRUSTED_ORIGINS, credentials: true }));
 // );
 
 
-app.use(express.json({ limit: "50mb" }));
 
 
 //for the stripe
@@ -55,6 +54,7 @@ app.post(
 app.use("/api/auth", toNodeHandler(auth));
 
 
+app.use(express.json({ limit: "50mb" }));
 
 
 app.get("/", (req: Request, res: Response) => {
